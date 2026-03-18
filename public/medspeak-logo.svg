@@ -1,0 +1,43 @@
+<svg width="960" height="340" viewBox="0 0 960 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="medspeakBrand" x1="180" y1="36" x2="356" y2="244" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E7490" />
+      <stop offset="1" stop-color="#5CC46C" />
+    </linearGradient>
+    <linearGradient id="medspeakText" x1="292" y1="220" x2="792" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E7490" />
+      <stop offset="1" stop-color="#5CC46C" />
+    </linearGradient>
+    <filter id="softShadow" x="22" y="14" width="402" height="284" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+      <feOffset dy="10" />
+      <feGaussianBlur stdDeviation="14" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.188235 0 0 0 0 0.247059 0 0 0 0.18 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape" />
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path d="M232.21 39.72C177.87 39.72 132.4 83.95 126.36 136.77C98.8 150.1 76.33 172.88 62.52 201.67L48 256.28L99.82 229.68C118.93 238.48 140.24 243.45 162.71 243.45C167.4 243.45 172.01 243.23 176.54 242.81C191.69 260.6 212.81 274.61 237.34 282.2L282.09 327L285.84 267.72C341.16 255.72 381.92 206.42 381.92 149.45C381.92 83.41 328.29 29.79 262.25 29.79C251.99 29.79 241.99 31.1 232.46 33.56C232.38 35.62 232.29 37.67 232.21 39.72Z" fill="url(#medspeakBrand)" />
+    <path d="M132.9 82.48C190.72 58.35 255.21 82.57 283.45 137.97" stroke="white" stroke-width="12" stroke-linecap="round" />
+    <path d="M86.04 221.9C98.89 160.67 157.74 119.76 220.01 126.53" stroke="white" stroke-width="12" stroke-linecap="round" />
+    <path d="M251.99 63.41C310.94 57.63 364.16 101.07 370.07 160.03C375.98 218.98 332.48 272.19 273.52 278.1" stroke="white" stroke-width="12" stroke-linecap="round" />
+    <path d="M224.5 62.5C273.27 62.5 312.8 102.03 312.8 150.8C312.8 199.57 273.27 239.1 224.5 239.1C175.73 239.1 136.2 199.57 136.2 150.8C136.2 102.03 175.73 62.5 224.5 62.5Z" fill="url(#medspeakBrand)" />
+    <rect x="198.42" y="78.86" width="52.16" height="110.38" rx="18" fill="white" />
+    <rect x="169.31" y="107.97" width="110.38" height="52.16" rx="18" fill="white" />
+    <path d="M139.54 183.08C158.4 173.3 175.58 169.23 191.1 170.87C180.02 183.54 166.4 191.9 150.22 195.97C136.68 199.37 123.22 198.52 109.84 193.42C120.02 188.87 129.92 185.42 139.54 183.08Z" fill="white" />
+    <path d="M309.46 183.08C290.6 173.3 273.42 169.23 257.9 170.87C268.98 183.54 282.6 191.9 298.78 195.97C312.32 199.37 325.78 198.52 339.16 193.42C328.98 188.87 319.08 185.42 309.46 183.08Z" fill="white" />
+    <path d="M118.8 175.42C140.21 171.21 159.38 171.37 176.31 175.91C165.54 186.3 151.49 192.9 134.16 195.72C120.48 197.95 108.07 197.75 96.94 195.1C103.41 186.92 110.7 180.36 118.8 175.42Z" fill="white" />
+    <path d="M330.2 175.42C308.79 171.21 289.62 171.37 272.69 175.91C283.46 186.3 297.51 192.9 314.84 195.72C328.52 197.95 340.93 197.75 352.06 195.1C345.59 186.92 338.3 180.36 330.2 175.42Z" fill="white" />
+    <rect x="216.61" y="175.26" width="15.78" height="111.62" rx="7.89" fill="white" />
+    <circle cx="224.5" cy="171.05" r="16.15" fill="white" />
+    <path d="M211.03 198.98C193.7 207.72 188.33 224.56 201.42 235.67C210.1 243.04 222.25 243.17 230.79 250.69C239.8 258.62 237.86 272.79 226.95 278.21C215.49 283.91 202.38 280.18 194.42 270.04" stroke="white" stroke-width="10.52" stroke-linecap="round" />
+    <path d="M237.97 230.91C255.3 239.65 260.67 256.49 247.58 267.6C238.9 274.97 226.75 275.1 218.21 282.62C209.2 290.55 211.14 304.72 222.05 310.14C233.51 315.84 246.62 312.11 254.58 301.97" stroke="white" stroke-width="10.52" stroke-linecap="round" />
+  </g>
+
+  <text x="286" y="245" fill="url(#medspeakText)" font-family="'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="104" font-weight="700" letter-spacing="-3">medspeak</text>
+  <text x="291" y="306" fill="#6B7280" font-family="'Avenir Next', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="500" letter-spacing="-0.5">Translating Care, Connecting Lives.</text>
+</svg>
