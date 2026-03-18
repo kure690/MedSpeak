@@ -1,5 +1,7 @@
 export const SYNTHESIS_UNSUPPORTED_MESSAGE =
   'Speech playback is unavailable in this browser.';
+export const SPEECH_START_TIMEOUT_MS = 1800;
+export const SPEECH_MIN_CONFIRMATION_MS = 450;
 
 export function isSpeechSynthesisSupported() {
   return (
@@ -51,6 +53,44 @@ export function createSpeechUtterance(text: string, language: string) {
     matchedVoice: Boolean(voice),
     utterance,
   };
+}
+
+export function getSpeechSynthesisLanguageErrorMessage(
+  languageLabel: string,
+  matchedVoice: boolean,
+  reason: 'start' | 'ended-early' = 'start',
+) {
+  if (reason === 'ended-early') {
+    if (!matchedVoice) {
+      return `${languageLabel} audio ended immediately and did not appear to play. This browser likely does not have a compatible voice ready for that language. Try another output language or install a ${languageLabel} voice.`;
+    }
+
+    return `${languageLabel} audio ended immediately and may not have played in this browser. Try another output language or browser voice.`;
+  }
+
+  if (!matchedVoice) {
+    return `${languageLabel} audio playback could not be started because this browser does not appear to have a compatible voice ready for that language. Try another output language or install a ${languageLabel} voice.`;
+  }
+
+  return `${languageLabel} audio playback could not be started in this browser. Try again or choose a different output language.`;
+}
+
+export function getMinimumExpectedSpeechDuration(text: string) {
+  const normalizedLength = text.trim().length;
+
+  if (normalizedLength <= 12) {
+    return 180;
+  }
+
+  if (normalizedLength <= 40) {
+    return 380;
+  }
+
+  if (normalizedLength <= 90) {
+    return 700;
+  }
+
+  return 1100;
 }
 
 export function startSpeech(utterance: SpeechSynthesisUtterance) {

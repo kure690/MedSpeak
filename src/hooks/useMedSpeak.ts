@@ -24,7 +24,11 @@ import {
 import {
   cancelSpeech,
   createSpeechUtterance,
+  getMinimumExpectedSpeechDuration,
+  getSpeechSynthesisLanguageErrorMessage,
   isSpeechSynthesisSupported,
+  SPEECH_MIN_CONFIRMATION_MS,
+  SPEECH_START_TIMEOUT_MS,
   subscribeToVoiceChanges,
   SYNTHESIS_UNSUPPORTED_MESSAGE,
   startSpeech,
@@ -67,6 +71,9 @@ export function useMedSpeak() {
   const deferredOriginalTranscript = useDeferredValue(originalTranscript);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speechConfirmedTimeoutRef = useRef<number | null>(null);
+  const speechPlaybackStartedAtRef = useRef<number | null>(null);
+  const speechStartTimeoutRef = useRef<number | null>(null);
   const translationRequestIdRef = useRef(0);
   const listeningStartedAtRef = useRef<number | null>(null);
   const receivedRecognitionResultRef = useRef(false);
@@ -161,6 +168,18 @@ export function useMedSpeak() {
   }, []);
 
   const teardownSpeech = useCallback(() => {
+    if (speechConfirmedTimeoutRef.current !== null) {
+      window.clearTimeout(speechConfirmedTimeoutRef.current);
+      speechConfirmedTimeoutRef.current = null;
+    }
+
+    if (speechStartTimeoutRef.current !== null) {
+      window.clearTimeout(speechStartTimeoutRef.current);
+      speechStartTimeoutRef.current = null;
+    }
+
+    speechPlaybackStartedAtRef.current = null;
+
     if (utteranceRef.current) {
       utteranceRef.current.onend = null;
       utteranceRef.current.onerror = null;
@@ -516,7 +535,9 @@ export function useMedSpeak() {
   };
 
   const handleSpeakTranslation = () => {
-    if (!translatedTranscript.trim()) {
+    const speechText = translatedTranscript.trim();
+
+    if (!speechText) {
       return;
     }
 
@@ -529,9 +550,10 @@ export function useMedSpeak() {
     teardownSpeech();
 
     const speechRequest = createSpeechUtterance(
-      translatedTranscript,
+      speechText,
       outputLanguage,
     );
+    const outputLanguageLabel = getLanguageLabel(outputLanguage);
 
     if (!speechRequest) {
       setStatus('error');
@@ -540,33 +562,125 @@ export function useMedSpeak() {
     }
 
     utteranceRef.current = speechRequest.utterance;
+    setStatus('speaking');
+    setStatusMessage(
+      speechRequest.matchedVoice
+        ? `Starting ${outputLanguageLabel} playback...`
+        : `Trying to start ${outputLanguageLabel} playback. No exact browser voice was found for this language.`,
+    );
 
     speechRequest.utterance.onstart = () => {
+      if (speechStartTimeoutRef.current !== null) {
+        window.clearTimeout(speechStartTimeoutRef.current);
+        speechStartTimeoutRef.current = null;
+      }
+
+      speechPlaybackStartedAtRef.current = Date.now();
       setSpeakingState(true);
       setStatus('speaking');
       setStatusMessage(
         speechRequest.matchedVoice
-          ? `Speaking ${getLanguageLabel(outputLanguage)} translation.`
-          : `No exact ${getLanguageLabel(outputLanguage)} voice was found. Using the browser default voice.`,
+          ? `Starting ${outputLanguageLabel} audio...`
+          : `Trying ${outputLanguageLabel} audio with the browser default voice.`,
       );
+
+      speechConfirmedTimeoutRef.current = window.setTimeout(() => {
+        if (utteranceRef.current !== speechRequest.utterance || !isSpeakingRef.current) {
+          return;
+        }
+
+        setStatus('speaking');
+        setStatusMessage(
+          speechRequest.matchedVoice
+            ? `Speaking ${outputLanguageLabel} translation.`
+            : `Speaking ${outputLanguageLabel} translation with the browser default voice.`,
+        );
+        speechConfirmedTimeoutRef.current = null;
+      }, SPEECH_MIN_CONFIRMATION_MS);
     };
 
     speechRequest.utterance.onend = () => {
+      if (speechConfirmedTimeoutRef.current !== null) {
+        window.clearTimeout(speechConfirmedTimeoutRef.current);
+        speechConfirmedTimeoutRef.current = null;
+      }
+
+      if (speechStartTimeoutRef.current !== null) {
+        window.clearTimeout(speechStartTimeoutRef.current);
+        speechStartTimeoutRef.current = null;
+      }
+
+      const playbackStartedAt = speechPlaybackStartedAtRef.current;
+      const playbackDuration = playbackStartedAt
+        ? Date.now() - playbackStartedAt
+        : 0;
+      const minimumDuration = getMinimumExpectedSpeechDuration(speechText);
+      const likelySilentPlayback =
+        playbackStartedAt !== null && playbackDuration < minimumDuration;
+
+      speechPlaybackStartedAtRef.current = null;
       utteranceRef.current = null;
       setSpeakingState(false);
+
+      if (likelySilentPlayback) {
+        setStatus('error');
+        setStatusMessage(
+          getSpeechSynthesisLanguageErrorMessage(
+            getLanguageLabel(outputLanguageRef.current),
+            speechRequest.matchedVoice,
+            'ended-early',
+          ),
+        );
+        return;
+      }
+
       restoreRestingStatus('Playback finished.');
     };
 
     speechRequest.utterance.onerror = () => {
+      if (speechConfirmedTimeoutRef.current !== null) {
+        window.clearTimeout(speechConfirmedTimeoutRef.current);
+        speechConfirmedTimeoutRef.current = null;
+      }
+
+      if (speechStartTimeoutRef.current !== null) {
+        window.clearTimeout(speechStartTimeoutRef.current);
+        speechStartTimeoutRef.current = null;
+      }
+
+      speechPlaybackStartedAtRef.current = null;
       utteranceRef.current = null;
       setSpeakingState(false);
       setStatus('error');
       setStatusMessage(
-        'Speech playback failed. Try again or choose a different output language.',
+        getSpeechSynthesisLanguageErrorMessage(
+          getLanguageLabel(outputLanguageRef.current),
+          speechRequest.matchedVoice,
+          'start',
+        ),
       );
     };
 
     startSpeech(speechRequest.utterance);
+
+    speechStartTimeoutRef.current = window.setTimeout(() => {
+      if (utteranceRef.current !== speechRequest.utterance || isSpeakingRef.current) {
+        return;
+      }
+
+      utteranceRef.current = null;
+      setSpeakingState(false);
+      cancelSpeech();
+      setStatus('error');
+      setStatusMessage(
+        getSpeechSynthesisLanguageErrorMessage(
+          getLanguageLabel(outputLanguageRef.current),
+          speechRequest.matchedVoice,
+          'start',
+        ),
+      );
+      speechStartTimeoutRef.current = null;
+    }, SPEECH_START_TIMEOUT_MS);
   };
 
   const handleClearSession = () => {
